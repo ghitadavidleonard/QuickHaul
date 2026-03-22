@@ -28,7 +28,7 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual bool IsActive { get; set; } = true;
 
         [RuleRequiredField]
-        [RuleCriteria(DefaultContexts.Save, "HireDate <= LocalDateTimeNow()", CustomMessageTemplate = "Hire Date cannot be in the future.")]
+        [RuleCriteria(DefaultContexts.Save, "HireDate <= LocalDateTimeNow()")]
         public virtual DateTime HireDate { get; set; }
     }
 }
