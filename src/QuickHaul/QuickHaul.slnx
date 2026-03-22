@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="EasyTest" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="QuickHaul/QuickHaul.Blazor.Server/QuickHaul.Blazor.Server.csproj" />
+  <Project Path="QuickHaul/QuickHaul.Module/QuickHaul.Module.csproj" />
+</Solution>
