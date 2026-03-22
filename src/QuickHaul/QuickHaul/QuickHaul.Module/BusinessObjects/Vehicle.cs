@@ -25,7 +25,7 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual VehicleClass VehicleClass { get; set; }
 
         [RuleValueComparison(ValueComparisonType.GreaterThan, 0)]
-        public virtual decimal PayloadCapacityKG { get; set; }
+        public virtual decimal PayloadCapacityKg { get; set; }
 
         public virtual VehicleStatus Status { get; set; } = VehicleStatus.Available;
 

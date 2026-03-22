@@ -9,6 +9,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.Extensions.DependencyInjection;
 using QuickHaul.Module.BusinessObjects;
+using QuickHaul.Module.BusinessObjects.Enums;
 
 namespace QuickHaul.Module.DatabaseUpdate
 {
@@ -37,6 +38,9 @@ namespace QuickHaul.Module.DatabaseUpdate
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
 
+            var dispatcherRole = CreateDispatcherRole();
+            var fleetManager = CreateFleetManagerRole();
+
             ObjectSpace.CommitChanges(); //This line persists created object(s).
 
             UserManager userManager = ObjectSpace.ServiceProvider.GetRequiredService<UserManager>();
@@ -62,6 +66,22 @@ namespace QuickHaul.Module.DatabaseUpdate
                 {
                     // Add the Administrators role to the user
                     user.Roles.Add(adminRole);
+                });
+            }
+
+            if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "dispatcher@quickhaul.local") == null)
+            {
+                _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "dispatcher@quickhaul.local", "Test123!", (user) =>
+                {
+                    user.Roles.Add(dispatcherRole);
+                });
+            }
+
+            if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "fleet@quickhaul.local") == null)
+            {
+                _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "fleet@quickhaul.local", "Test123!", (user) =>
+                {
+                    user.Roles.Add(fleetManager);
                 });
             }
 
@@ -102,6 +122,38 @@ namespace QuickHaul.Module.DatabaseUpdate
                 defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
             }
             return defaultRole;
+        }
+
+        PermissionPolicyRole CreateDispatcherRole()
+        {
+            var dispatcherRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Dispatcher");
+            if (dispatcherRole == null)
+            {
+                dispatcherRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                dispatcherRole.Name = "Dispatcher";
+                dispatcherRole.AddTypePermission<DeliveryOrder>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Customer>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+            }
+
+            return dispatcherRole;
+        }
+
+        PermissionPolicyRole CreateFleetManagerRole()
+        {
+            var fleetManagerRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "FleetManager");
+            if (fleetManagerRole == null) 
+            {
+                fleetManagerRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                fleetManagerRole.Name = "FleetManager";
+                fleetManagerRole.AddTypePermission<Vehicle>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                fleetManagerRole.AddTypePermission<Driver>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                fleetManagerRole.AddTypePermission<DeliveryOrder>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                fleetManagerRole.AddTypePermission<Customer>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+            }
+
+            return fleetManagerRole;
         }
     }
 }

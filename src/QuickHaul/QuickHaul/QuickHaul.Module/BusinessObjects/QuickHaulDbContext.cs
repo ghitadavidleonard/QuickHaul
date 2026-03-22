@@ -21,6 +21,11 @@ namespace QuickHaul.Module.BusinessObjects
         public DbSet<QuickHaul.Module.BusinessObjects.ApplicationUser> Users { get; set; }
         public DbSet<QuickHaul.Module.BusinessObjects.ApplicationUserLoginInfo> UserLoginsInfo { get; set; }
         public DbSet<DashboardData> DashboardData { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<DeliveryOrder> DeliveryOrders { get; set; }
+        public DbSet<DeliveryEvent> DeliveryEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
