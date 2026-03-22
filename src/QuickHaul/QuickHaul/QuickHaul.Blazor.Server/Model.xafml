@@ -1,10 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
-  <Options UIType="TabbedMDI"
-         FormStyle="Ribbon"
-         RestoreTabbedMdiLayout="True"
-         ShowTabImage="True"
-	 VirtualScrollingEnabled="True">
-  </Options>
-  <NavigationItems NavigationStyle="Accordion" />
+  <NavigationItems NavigationStyle="Accordion">
+    <Items>
+      <Item Id="Default">
+        <Items>
+          <Item Id="Customer_ListView" ImageName="BO_Customer" />
+          <Item Id="DeliveryOrder_ListView" ImageName="CustomerQuickSales" />
+          <Item Id="Driver_ListView" ImageName="BO_Person" />
+          <Item Id="Vehicle_ListView" ImageName="Travel_Car" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+  <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
+  </SchemaModules>
 </Application>
