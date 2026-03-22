@@ -1,10 +1,12 @@
-﻿using DevExpress.Persistent.BaseImpl.EF;
+﻿using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using QuickHaul.Module.BusinessObjects.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace QuickHaul.Module.BusinessObjects
 {
+    [DefaultClassOptions]
     public class Vehicle : BaseObject
     {
         [RuleRequiredField]
