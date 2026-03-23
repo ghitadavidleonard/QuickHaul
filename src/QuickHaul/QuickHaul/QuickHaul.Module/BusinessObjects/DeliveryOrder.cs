@@ -54,5 +54,26 @@ namespace QuickHaul.Module.BusinessObjects
 
         [StringLength(1000)]
         public virtual string Notes { get; set; }
+
+        [RuleFromBoolProperty("CargoWeightKg_VehicleCapacity", DefaultContexts.Save,
+            "Cargo weight exceeds the assigned vehicle's payload capacity.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "CargoWeightKg, AssignedVehicle")]
+        public bool CargoWeightWithinVehicleCapacity =>
+            AssignedVehicle == null || CargoWeightKg <= AssignedVehicle.PayloadCapacityKg;
+
+        [RuleFromBoolProperty("AssignedVehicle_RequiredForDispatch", DefaultContexts.Save,
+            "A vehicle must be assigned before dispatching.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "AssignedVehicle, Status")]
+        public bool VehicleAssignedIfDispatched =>
+            Status != DeliveryOrderStatus.Dispatched || AssignedVehicle != null;
+
+        [RuleFromBoolProperty("AssignedDriver_RequiredForDispatch", DefaultContexts.Save,
+            "A driver must be assigned before dispatching.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "AssignedDriver, Status")]
+        public bool DriverAssignedIfDispatched =>
+            Status != DeliveryOrderStatus.Dispatched || AssignedDriver != null;
     }
 }

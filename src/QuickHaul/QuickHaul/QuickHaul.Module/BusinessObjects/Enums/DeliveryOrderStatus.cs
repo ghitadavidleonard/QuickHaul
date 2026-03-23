@@ -2,11 +2,11 @@
 {
     public enum DeliveryOrderStatus
     {
-        Created = 0,
-        Dispatched = 1,
-        InTransit = 2,
-        Delivered = 3,
-        Closed = 4,
-        Cancelled = 5
+        Created = 1,
+        Dispatched = 2,
+        InTransit = 3,
+        Delivered = 4,
+        Closed = 5,
+        Cancelled = 6
     }
 }

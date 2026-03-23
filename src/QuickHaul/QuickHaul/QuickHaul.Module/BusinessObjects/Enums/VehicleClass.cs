@@ -2,8 +2,8 @@
 {
     public enum VehicleClass
     {
-        Van = 0,
-        Truck = 1,
-        HeavyTruck = 2
+        Van = 1,
+        Truck = 2,
+        HeavyTruck = 3
     }
 }
