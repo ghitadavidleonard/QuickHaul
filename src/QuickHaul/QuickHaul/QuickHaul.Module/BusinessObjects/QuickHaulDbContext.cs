@@ -26,6 +26,7 @@ namespace QuickHaul.Module.BusinessObjects
         public DbSet<Customer> Customers { get; set; }
         public DbSet<DeliveryOrder> DeliveryOrders { get; set; }
         public DbSet<DeliveryEvent> DeliveryEvents { get; set; }
+        public DbSet<OrderSequence> OrderSequences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -11,7 +11,7 @@ namespace QuickHaul.Module.BusinessObjects
     [DefaultClassOptions]
     public class DeliveryOrder : BaseObject
     {
-        [RuleRequiredField]
+        [ModelDefault("AllowEdit", "False")]
         [StringLength(20)]
         public virtual string OrderNumber { get; set; }
 
@@ -20,10 +20,12 @@ namespace QuickHaul.Module.BusinessObjects
 
         [RuleRequiredField]
         [StringLength(300)]
+        [ModelDefault("RowCount", "3")]
         public virtual string PickupAddress { get; set; }
 
         [RuleRequiredField]
         [StringLength(300)]
+        [ModelDefault("RowCount", "3")]
         public virtual string DeliveryAddress { get; set; }
 
         [RuleRequiredField]

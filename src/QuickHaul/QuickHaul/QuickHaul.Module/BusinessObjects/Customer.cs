@@ -1,4 +1,5 @@
-﻿using DevExpress.Persistent.Base;
+﻿using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.ComponentModel.DataAnnotations;
@@ -28,6 +29,7 @@ namespace QuickHaul.Module.BusinessObjects
 
         [RuleRequiredField]
         [StringLength(300)]
+        [ModelDefault("RowCount", "3")]
         public virtual string BillingAddress { get; set; }
     }
 }
