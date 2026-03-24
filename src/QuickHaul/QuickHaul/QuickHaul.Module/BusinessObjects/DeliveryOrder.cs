@@ -37,15 +37,20 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual decimal CargoWeightKg { get; set; }
 
         [RuleRequiredField]
-        [RuleValueComparison("RequestedPickupDate_TodayOrLater", 
-            DefaultContexts.Save, 
-            ValueComparisonType.GreaterThanOrEqual, "[Now]")]
         public virtual DateTime RequestedPickupDate { get; set; }
+
+        [RuleFromBoolProperty("RequestedPickupDate_TodayOrLater", DefaultContexts.Save,
+            "Requested pickup date must be today or later.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "RequestedPickupDate")]
+        public bool RequestedPickupDateTodayOrLater => RequestedPickupDate >= DateTime.Today;
 
         public virtual DateTime? ActualPickupDate { get; set; }
 
         public virtual DateTime? ActualDeliveryDate { get; set; }
 
+        // Read-only in the UI — transitions are driven exclusively by the action buttons.
+        [ModelDefault("AllowEdit", "False")]
         public virtual DeliveryOrderStatus Status { get; set; } = DeliveryOrderStatus.Created;
 
         public virtual Vehicle AssignedVehicle { get; set; }

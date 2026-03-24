@@ -28,7 +28,12 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual bool IsActive { get; set; } = true;
 
         [RuleRequiredField]
-        [RuleValueComparison("HireDate_NotInFuture", DefaultContexts.Save, ValueComparisonType.LessThanOrEqual, "[Now]")]
         public virtual DateTime HireDate { get; set; }
+
+        [RuleFromBoolProperty("HireDate_NotInFuture", DefaultContexts.Save,
+            "Hire date cannot be in the future.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "HireDate")]
+        public bool HireDateNotInFuture => HireDate <= DateTime.Now;
     }
 }
