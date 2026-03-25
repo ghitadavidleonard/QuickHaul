@@ -3,7 +3,9 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Microsoft.EntityFrameworkCore;
 using QuickHaul.Module.BusinessObjects.Enums;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace QuickHaul.Module.BusinessObjects
@@ -34,22 +36,17 @@ namespace QuickHaul.Module.BusinessObjects
 
         [RuleValueComparison("CargoWeightKg_Positive", DefaultContexts.Save,
             ValueComparisonType.GreaterThan, 0)]
+        [ModelDefault("DisplayFormat", "{0:N2}")]
+        [ModelDefault("EditMask", "n2")]
         public virtual decimal CargoWeightKg { get; set; }
 
         [RuleRequiredField]
         public virtual DateTime RequestedPickupDate { get; set; }
 
-        [RuleFromBoolProperty("RequestedPickupDate_TodayOrLater", DefaultContexts.Save,
-            "Requested pickup date must be today or later.",
-            SkipNullOrEmptyValues = false,
-            UsedProperties = "RequestedPickupDate")]
-        public bool RequestedPickupDateTodayOrLater => RequestedPickupDate >= DateTime.Today;
-
         public virtual DateTime? ActualPickupDate { get; set; }
 
         public virtual DateTime? ActualDeliveryDate { get; set; }
 
-        // Read-only in the UI — transitions are driven exclusively by the action buttons.
         [ModelDefault("AllowEdit", "False")]
         public virtual DeliveryOrderStatus Status { get; set; } = DeliveryOrderStatus.Created;
 
@@ -60,10 +57,18 @@ namespace QuickHaul.Module.BusinessObjects
         [StringLength(1000)]
         public virtual string Notes { get; set; }
 
+        [RuleFromBoolProperty("RequestedPickupDate_TodayOrLater", DefaultContexts.Save,
+            "Requested pickup date must be today or later.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "RequestedPickupDate")]
+        [Browsable(false)]
+        public bool RequestedPickupDateTodayOrLater => RequestedPickupDate >= DateTime.Today;
+
         [RuleFromBoolProperty("CargoWeightKg_VehicleCapacity", DefaultContexts.Save,
             "Cargo weight exceeds the assigned vehicle's payload capacity.",
             SkipNullOrEmptyValues = false,
             UsedProperties = "CargoWeightKg, AssignedVehicle")]
+        [Browsable(false)]
         public bool CargoWeightWithinVehicleCapacity =>
             AssignedVehicle == null || CargoWeightKg <= AssignedVehicle.PayloadCapacityKg;
 
@@ -71,6 +76,7 @@ namespace QuickHaul.Module.BusinessObjects
             "A vehicle must be assigned before dispatching.",
             SkipNullOrEmptyValues = false,
             UsedProperties = "AssignedVehicle, Status")]
+        [Browsable(false)]
         public bool VehicleAssignedIfDispatched =>
             Status != DeliveryOrderStatus.Dispatched || AssignedVehicle != null;
 
@@ -78,6 +84,7 @@ namespace QuickHaul.Module.BusinessObjects
             "A driver must be assigned before dispatching.",
             SkipNullOrEmptyValues = false,
             UsedProperties = "AssignedDriver, Status")]
+        [Browsable(false)]
         public bool DriverAssignedIfDispatched =>
             Status != DeliveryOrderStatus.Dispatched || AssignedDriver != null;
     }

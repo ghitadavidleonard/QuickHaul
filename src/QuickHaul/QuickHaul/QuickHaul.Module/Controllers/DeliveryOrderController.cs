@@ -79,10 +79,10 @@ namespace QuickHaul.Module.Controllers
             var status = ViewCurrentObject?.Status;
 
             _assignAndDispatchAction.Active["ValidStatus"] = status == DeliveryOrderStatus.Created;
-            _confirmPickupAction.Active["ValidStatus"]     = status == DeliveryOrderStatus.Dispatched;
-            _confirmDeliveryAction.Active["ValidStatus"]   = status == DeliveryOrderStatus.InTransit;
-            _closeOrderAction.Active["ValidStatus"]        = status == DeliveryOrderStatus.Delivered;
-            _cancelAction.Active["ValidStatus"]            =
+            _confirmPickupAction.Active["ValidStatus"] = status == DeliveryOrderStatus.Dispatched;
+            _confirmDeliveryAction.Active["ValidStatus"] = status == DeliveryOrderStatus.InTransit;
+            _closeOrderAction.Active["ValidStatus"] = status == DeliveryOrderStatus.Delivered;
+            _cancelAction.Active["ValidStatus"] =
                 status == DeliveryOrderStatus.Created || status == DeliveryOrderStatus.Dispatched;
         }
 
@@ -98,7 +98,7 @@ namespace QuickHaul.Module.Controllers
         // ── Transition: Created → Dispatched ────────────────────────────────────
         private void AssignAndDispatch_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
-            var order   = ViewCurrentObject;
+            var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
 
             if (order.AssignedVehicle == null)
@@ -140,7 +140,7 @@ namespace QuickHaul.Module.Controllers
         // ── Transition: Dispatched → InTransit ──────────────────────────────────
         private void ConfirmPickup_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
-            var order   = ViewCurrentObject;
+            var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
 
             order.ActualPickupDate ??= DateTime.Now;
@@ -156,7 +156,7 @@ namespace QuickHaul.Module.Controllers
         // ── Transition: InTransit → Delivered ───────────────────────────────────
         private void ConfirmDelivery_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
-            var order   = ViewCurrentObject;
+            var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
 
             order.ActualDeliveryDate ??= DateTime.Now;
@@ -172,7 +172,7 @@ namespace QuickHaul.Module.Controllers
         // ── Transition: Delivered → Closed ──────────────────────────────────────
         private void CloseOrder_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
-            var order   = ViewCurrentObject;
+            var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
 
             if (order.AssignedVehicle != null)
@@ -192,8 +192,8 @@ namespace QuickHaul.Module.Controllers
         // ── Transition: Created|Dispatched → Cancelled ──────────────────────────
         private void Cancel_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
-            var order      = ViewCurrentObject;
-            var remarks    = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
+            var order = ViewCurrentObject;
+            var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
             var fromStatus = order.Status; // capture before changing it
 
             // Release the vehicle whether we're cancelling from Created or Dispatched.
@@ -216,13 +216,13 @@ namespace QuickHaul.Module.Controllers
         private void CreateDeliveryEvent(DeliveryOrder order, DeliveryOrderStatus? fromStatus,
             DeliveryOrderStatus toStatus, string remarks)
         {
-            var evt        = ObjectSpace.CreateObject<DeliveryEvent>();
+            var evt = ObjectSpace.CreateObject<DeliveryEvent>();
             evt.DeliveryOrder = order;
-            evt.Timestamp  = DateTime.UtcNow;
+            evt.Timestamp = DateTime.UtcNow;
             evt.FromStatus = fromStatus;
-            evt.ToStatus   = toStatus;
-            evt.ChangedBy  = GetCurrentUserName();
-            evt.Remarks    = remarks;
+            evt.ToStatus = toStatus;
+            evt.ChangedBy = GetCurrentUserName();
+            evt.Remarks = remarks;
         }
 
         // Fires only on the very first save of a new order.
@@ -238,20 +238,20 @@ namespace QuickHaul.Module.Controllers
                 var sequence   = ObjectSpace.FirstOrDefault<OrderSequence>(s => s.DateKey == dateKey);
                 if (sequence == null)
                 {
-                    sequence              = ObjectSpace.CreateObject<OrderSequence>();
-                    sequence.DateKey      = dateKey;
+                    sequence = ObjectSpace.CreateObject<OrderSequence>();
+                    sequence.DateKey = dateKey;
                     sequence.LastSequence = 0;
                 }
                 sequence.LastSequence++;
                 order.OrderNumber = $"DLV-{dateKey}-{sequence.LastSequence:D4}";
             }
 
-            var creationEvent           = ObjectSpace.CreateObject<DeliveryEvent>();
+            var creationEvent = ObjectSpace.CreateObject<DeliveryEvent>();
             creationEvent.DeliveryOrder = order;
-            creationEvent.Timestamp     = DateTime.UtcNow;
-            creationEvent.FromStatus    = null;
-            creationEvent.ToStatus      = DeliveryOrderStatus.Created;
-            creationEvent.ChangedBy     = GetCurrentUserName();
+            creationEvent.Timestamp = DateTime.UtcNow;
+            creationEvent.FromStatus = null;
+            creationEvent.ToStatus = DeliveryOrderStatus.Created;
+            creationEvent.ChangedBy = GetCurrentUserName();
         }
 
         // Maps VehicleClass → the corresponding LicenseClasses flag.
@@ -259,10 +259,10 @@ namespace QuickHaul.Module.Controllers
         // while LicenseClasses.HeavyTruck = 4 (Flags bit).
         private static LicenseClasses GetRequiredLicense(VehicleClass vehicleClass) => vehicleClass switch
         {
-            VehicleClass.Van        => LicenseClasses.Van,
-            VehicleClass.Truck      => LicenseClasses.Truck,
+            VehicleClass.Van => LicenseClasses.Van,
+            VehicleClass.Truck => LicenseClasses.Truck,
             VehicleClass.HeavyTruck => LicenseClasses.HeavyTruck,
-            _                       => throw new InvalidOperationException($"Unknown vehicle class: {vehicleClass}")
+            _ => throw new InvalidOperationException($"Unknown vehicle class: {vehicleClass}")
         };
 
         private string GetCurrentUserName() =>

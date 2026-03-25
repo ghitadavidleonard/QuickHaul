@@ -2,6 +2,7 @@
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using QuickHaul.Module.BusinessObjects.Enums;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace QuickHaul.Module.BusinessObjects
@@ -34,6 +35,7 @@ namespace QuickHaul.Module.BusinessObjects
             "Hire date cannot be in the future.",
             SkipNullOrEmptyValues = false,
             UsedProperties = "HireDate")]
+        [Browsable(false)]
         public bool HireDateNotInFuture => HireDate <= DateTime.Now;
     }
 }

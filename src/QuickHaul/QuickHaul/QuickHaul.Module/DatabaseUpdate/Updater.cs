@@ -86,6 +86,8 @@ namespace QuickHaul.Module.DatabaseUpdate
             }
 
             ObjectSpace.CommitChanges(); //This line persists created object(s).
+
+            SeedDemoData();
 #endif
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -154,6 +156,189 @@ namespace QuickHaul.Module.DatabaseUpdate
             }
 
             return fleetManagerRole;
+        }
+
+        private void SeedDemoData()
+        {
+            if (ObjectSpace.FirstOrDefault<Vehicle>(_ => true) != null)
+                return;
+
+            // ── Vehicles ─────────────────────────────────────────────────────────
+
+            var vFordTransit = ObjectSpace.CreateObject<Vehicle>();
+            vFordTransit.RegistrationPlate = "QH001B";
+            vFordTransit.Make = "Ford";
+            vFordTransit.Model = "Transit";
+            vFordTransit.VehicleClass = VehicleClass.Van;
+            vFordTransit.PayloadCapacityKg = 1200m;
+            vFordTransit.Status = VehicleStatus.Available;
+            vFordTransit.CurrentLocation = "Bucharest Depot";
+
+            var vSprinter = ObjectSpace.CreateObject<Vehicle>();
+            vSprinter.RegistrationPlate = "QH002B";
+            vSprinter.Make = "Mercedes-Benz";
+            vSprinter.Model = "Sprinter 316";
+            vSprinter.VehicleClass = VehicleClass.Van;
+            vSprinter.PayloadCapacityKg = 1_500m;
+            vSprinter.Status = VehicleStatus.IsUse;
+            vSprinter.CurrentLocation = "Cluj-Napoca Hub";
+
+            var vManTgm = ObjectSpace.CreateObject<Vehicle>();
+            vManTgm.RegistrationPlate = "QH003B";
+            vManTgm.Make = "MAN";
+            vManTgm.Model = "TGM 18.290";
+            vManTgm.VehicleClass = VehicleClass.Truck;
+            vManTgm.PayloadCapacityKg = 7_000m;
+            vManTgm.Status = VehicleStatus.IsUse;
+            vManTgm.CurrentLocation = "Timisoara Depot";
+
+            var vVolvoFh = ObjectSpace.CreateObject<Vehicle>();
+            vVolvoFh.RegistrationPlate = "QH004B";
+            vVolvoFh.Make = "Volvo";
+            vVolvoFh.Model = "FH 460";
+            vVolvoFh.VehicleClass = VehicleClass.HeavyTruck;
+            vVolvoFh.PayloadCapacityKg = 24_000m;
+            vVolvoFh.Status = VehicleStatus.Available;
+            vVolvoFh.CurrentLocation = "Constanta Port";
+
+            var vScania = ObjectSpace.CreateObject<Vehicle>();
+            vScania.RegistrationPlate = "QH005B";
+            vScania.Make = "Scania";
+            vScania.Model = "R 450";
+            vScania.VehicleClass = VehicleClass.HeavyTruck;
+            vScania.PayloadCapacityKg = 22_000m;
+            vScania.Status = VehicleStatus.Maintenance;
+            vScania.CurrentLocation = "Bucharest Depot";
+
+            // ── Drivers ──────────────────────────────────────────────────────────
+
+            var dIon = ObjectSpace.CreateObject<Driver>();
+            dIon.FullName = "Ion Popescu";
+            dIon.LicenseNumber = "DL-RO-001";
+            dIon.LicenseClasses = LicenseClasses.Van | LicenseClasses.Truck | LicenseClasses.HeavyTruck;
+            dIon.PhoneNumber = "+40721000001";
+            dIon.IsActive = true;
+            dIon.HireDate = new DateTime(2019, 3, 15);
+
+            var dMaria = ObjectSpace.CreateObject<Driver>();
+            dMaria.FullName = "Maria Ionescu";
+            dMaria.LicenseNumber = "DL-RO-002";
+            dMaria.LicenseClasses = LicenseClasses.Van;
+            dMaria.PhoneNumber = "+40721000002";
+            dMaria.IsActive = true;
+            dMaria.HireDate = new DateTime(2021, 6, 1);
+
+            var dAndrei = ObjectSpace.CreateObject<Driver>();
+            dAndrei.FullName = "Andrei Dumitrescu";
+            dAndrei.LicenseNumber = "DL-RO-003";
+            dAndrei.LicenseClasses = LicenseClasses.Van | LicenseClasses.Truck | LicenseClasses.HeavyTruck;
+            dAndrei.PhoneNumber = "+40721000003";
+            dAndrei.IsActive = true;
+            dAndrei.HireDate = new DateTime(2018, 9, 10);
+
+            // ── Customers ────────────────────────────────────────────────────────
+
+            var cTechCorp = ObjectSpace.CreateObject<Customer>();
+            cTechCorp.CompanyName = "TechCorp SRL";
+            cTechCorp.ContactPerson = "Mihai Vasilescu";
+            cTechCorp.Email = "office@techcorp.ro";
+            cTechCorp.Phone = "+40311000001";
+            cTechCorp.BillingAddress = "Str. Informaticii 12, Sector 1\nBucharest 010101\nRomania";
+
+            var cFreshFoods = ObjectSpace.CreateObject<Customer>();
+            cFreshFoods.CompanyName = "Fresh Foods SA";
+            cFreshFoods.ContactPerson = "Elena Gheorghiu";
+            cFreshFoods.Email = "logistics@freshfoods.ro";
+            cFreshFoods.Phone = "+40311000002";
+            cFreshFoods.BillingAddress = "Calea Florestilor 45\nCluj-Napoca 400000\nRomania";
+
+            var cBuildRight = ObjectSpace.CreateObject<Customer>();
+            cBuildRight.CompanyName = "BuildRight Construct SRL";
+            cBuildRight.ContactPerson = "Calin Marin";
+            cBuildRight.Email = "supply@buildright.ro";
+            cBuildRight.Phone = "+40311000003";
+            cBuildRight.BillingAddress = "Bd. Revolutiei 78\nTimisoara 300000\nRomania";
+
+            // Persist base entities before creating orders (FK satisfaction)
+            ObjectSpace.CommitChanges();
+
+            // ── Delivery Orders ──────────────────────────────────────────────────
+            // Status: Created — awaiting dispatch, no vehicle/driver yet
+
+            var o1 = ObjectSpace.CreateObject<DeliveryOrder>();
+            o1.OrderNumber = "QH-20260328-001";
+            o1.Customer = cTechCorp;
+            o1.PickupAddress = "Str. Informaticii 12, Sector 1, Bucharest";
+            o1.DeliveryAddress = "Str. Industriilor 5, Brasov";
+            o1.CargoDescription = "Server rack units and networking equipment - fragile";
+            o1.CargoWeightKg = 480m;
+            o1.RequestedPickupDate = new DateTime(2026, 3, 28);
+            o1.Status = DeliveryOrderStatus.Created;
+            o1.Notes = "Handle with care. Requires liftgate.";
+
+            // Status: Dispatched — vehicle and driver assigned, picked up
+
+            var o2 = ObjectSpace.CreateObject<DeliveryOrder>();
+            o2.OrderNumber = "QH-20260320-002";
+            o2.Customer = cFreshFoods;
+            o2.PickupAddress = "Calea Florestilor 45, Cluj-Napoca";
+            o2.DeliveryAddress = "Str. Principala 10, Oradea";
+            o2.CargoDescription = "Chilled dairy products - temperature-sensitive";
+            o2.CargoWeightKg = 820m;
+            o2.RequestedPickupDate = new DateTime(2026, 3, 20);
+            o2.ActualPickupDate = new DateTime(2026, 3, 20);
+            o2.Status = DeliveryOrderStatus.Dispatched;
+            o2.AssignedVehicle = vSprinter;
+            o2.AssignedDriver = dMaria;
+            o2.Notes = "Maintain cold chain. Deliver before 10:00.";
+
+            // Status: InTransit — en route to destination
+
+            var o3 = ObjectSpace.CreateObject<DeliveryOrder>();
+            o3.OrderNumber = "QH-20260322-003";
+            o3.Customer = cBuildRight;
+            o3.PickupAddress = "Bd. Revolutiei 78, Timisoara";
+            o3.DeliveryAddress = "Str. Santierului 3, Arad";
+            o3.CargoDescription = "Steel beams, cement bags, and scaffolding parts";
+            o3.CargoWeightKg = 6_800m;
+            o3.RequestedPickupDate = new DateTime(2026, 3, 22);
+            o3.ActualPickupDate = new DateTime(2026, 3, 22);
+            o3.Status = DeliveryOrderStatus.InTransit;
+            o3.AssignedVehicle = vManTgm;
+            o3.AssignedDriver = dAndrei;
+            o3.Notes = "Delivery requires forklift on-site.";
+
+            // Status: Delivered — completed successfully
+
+            var o4 = ObjectSpace.CreateObject<DeliveryOrder>();
+            o4.OrderNumber = "QH-20260210-004";
+            o4.Customer = cTechCorp;
+            o4.PickupAddress = "Str. Informaticii 12, Sector 1, Bucharest";
+            o4.DeliveryAddress = "Parc Industrial Nord, Ploiesti";
+            o4.CargoDescription = "UPS units and data centre cooling equipment";
+            o4.CargoWeightKg = 15_200m;
+            o4.RequestedPickupDate = new DateTime(2026, 2, 10);
+            o4.ActualPickupDate = new DateTime(2026, 2, 10);
+            o4.ActualDeliveryDate = new DateTime(2026, 2, 11);
+            o4.Status = DeliveryOrderStatus.Delivered;
+            o4.AssignedVehicle = vVolvoFh;
+            o4.AssignedDriver = dIon;
+            o4.Notes = "Delivery completed and signed off by client.";
+
+            // Status: Cancelled — cancelled by customer before dispatch
+
+            var o5 = ObjectSpace.CreateObject<DeliveryOrder>();
+            o5.OrderNumber = "QH-20260225-005";
+            o5.Customer = cFreshFoods;
+            o5.PickupAddress = "Calea Florestilor 45, Cluj-Napoca";
+            o5.DeliveryAddress = "Str. Marasesti 9, Sibiu";
+            o5.CargoDescription = "Fresh seasonal vegetables - perishable";
+            o5.CargoWeightKg = 190m;
+            o5.RequestedPickupDate = new DateTime(2026, 2, 25);
+            o5.Status = DeliveryOrderStatus.Cancelled;
+            o5.Notes = "Cancelled by customer - order rescheduled.";
+
+            ObjectSpace.CommitChanges();
         }
     }
 }

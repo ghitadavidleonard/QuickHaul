@@ -1,4 +1,5 @@
-﻿using DevExpress.Persistent.Base;
+﻿using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using QuickHaul.Module.BusinessObjects.Enums;
@@ -25,6 +26,8 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual VehicleClass VehicleClass { get; set; }
 
         [RuleValueComparison(ValueComparisonType.GreaterThan, 0)]
+        [ModelDefault("DisplayFormat", "{0:N2}")]
+        [ModelDefault("EditMask", "n2")]
         public virtual decimal PayloadCapacityKg { get; set; }
 
         public virtual VehicleStatus Status { get; set; } = VehicleStatus.Available;
