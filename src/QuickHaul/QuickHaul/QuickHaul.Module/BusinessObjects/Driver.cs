@@ -23,7 +23,7 @@ namespace QuickHaul.Module.BusinessObjects
 
         [RuleRequiredField]
         [StringLength(20)]
-        [RuleRegularExpression(@"^\+?[0-9]{7,15}$")]
+        [RuleRegularExpression(@"^\+?[0-9]{7,15}$", CustomMessageTemplate="The phone number must be a valid one!")]
         public virtual string PhoneNumber { get; set; }
 
         public virtual bool IsActive { get; set; } = true;

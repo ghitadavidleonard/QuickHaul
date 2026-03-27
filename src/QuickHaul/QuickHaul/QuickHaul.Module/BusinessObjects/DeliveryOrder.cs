@@ -51,7 +51,6 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual DeliveryOrderStatus Status { get; set; } = DeliveryOrderStatus.Created;
 
         public virtual Vehicle AssignedVehicle { get; set; }
-
         public virtual Driver AssignedDriver { get; set; }
 
         [StringLength(1000)]
@@ -87,5 +86,15 @@ namespace QuickHaul.Module.BusinessObjects
         [Browsable(false)]
         public bool DriverAssignedIfDispatched =>
             Status != DeliveryOrderStatus.Dispatched || AssignedDriver != null;
+
+        [RuleFromBoolProperty(
+            "AssignedDriver_MustBeActive",
+            DefaultContexts.Save,
+            "Only active drivers can be assigned to a delivery order.",
+            SkipNullOrEmptyValues = false,
+            UsedProperties = "AssignedDriver")]
+        [Browsable(false)]
+        public bool AssignedDriverMustBeActive =>
+            AssignedDriver == null || AssignedDriver.IsActive;
     }
 }
