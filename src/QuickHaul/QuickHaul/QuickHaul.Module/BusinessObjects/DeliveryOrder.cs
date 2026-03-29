@@ -3,6 +3,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using QuickHaul.Module.BusinessObjects.Enums;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -55,6 +56,11 @@ namespace QuickHaul.Module.BusinessObjects
 
         [StringLength(1000)]
         public virtual string Notes { get; set; }
+
+        [ModelDefault("AllowEdit", "False")]
+        [ModelDefault("AllowNew", "False")]
+        [ModelDefault("AllowDelete", "False")]
+        public virtual ObservableCollection<DeliveryEvent> DeliveryEvents { get; set; } = new ObservableCollection<DeliveryEvent>();
 
         [RuleFromBoolProperty("RequestedPickupDate_TodayOrLater", DefaultContexts.Save,
             "Requested pickup date must be today or later.",

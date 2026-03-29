@@ -10,6 +10,7 @@
     </Actions>
   </ActionDesign>
   <BOModel>
+    <Class Name="QuickHaul.Module.BusinessObjects.DeliveryEvent" DefaultListViewMasterDetailMode="ListViewOnly" />
     <Class Name="QuickHaul.Module.BusinessObjects.DeliveryOrder">
       <OwnMembers>
         <Member Name="CargoWeightKg" EditMask="n2" />
@@ -49,7 +50,15 @@
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
+    <ListView Id="DeliveryEvent_ListView" DetailViewID="" AllowDelete="False">
+      <Columns>
+        <ColumnInfo Id="Timestamp" SortOrder="Descending" />
+      </Columns>
+    </ListView>
     <DetailView Id="DeliveryOrder_DetailView">
+      <Items>
+        <PropertyEditor Id="AssignedVehicle" LookupProperty="RegistrationPlate" />
+      </Items>
       <Layout>
         <LayoutGroup Id="Main">
           <LayoutGroup Id="OrderInfo" Caption="Order Info" ShowCaption="True" Direction="Horizontal" Index="0" IsNewNode="True">
@@ -78,9 +87,10 @@
             <LayoutItem Id="PickupAddress" ViewItem="PickupAddress" ShowCaption="" Index="0" IsNewNode="True" />
             <LayoutItem Id="DeliveryAddress" ViewItem="DeliveryAddress" ShowCaption="" Index="1" IsNewNode="True" />
           </LayoutGroup>
-          <LayoutGroup Id="NotesGroup" Caption="Notes" ShowCaption="True" IsNewNode="True">
+          <LayoutGroup Id="NotesGroup" Caption="Notes" ShowCaption="True" Index="3" IsNewNode="True">
             <LayoutItem Id="Notes" ViewItem="Notes" ShowCaption="" Index="0" IsNewNode="True" />
           </LayoutGroup>
+          <LayoutGroup Id="DeliveryEvents_Group" Index="4" />
           <LayoutGroup Id="SimpleEditors" Removed="True">
             <LayoutGroup Id="DeliveryOrder" Index="2" Removed="True">
               <LayoutGroup Id="DeliveryOrder_col1" Removed="True">
@@ -107,5 +117,11 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="DeliveryOrder_ListView">
+      <Columns>
+        <ColumnInfo Id="RequestedPickupDate" SortOrder="Descending" />
+        <ColumnInfo Id="AssignedVehicle" LookupProperty="RegistrationPlate" />
+      </Columns>
+    </ListView>
   </Views>
 </Application>
