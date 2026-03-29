@@ -39,4 +39,64 @@
   <SchemaModules>
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
+  <Views>
+    <DetailView Id="DeliveryOrder_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="OrderInfo" Caption="Order Info" ShowCaption="True" Direction="Horizontal" Index="0" IsNewNode="True">
+            <LayoutGroup Id="OrderInfo_col1" ShowCaption="False" IsNewNode="True">
+              <LayoutItem Id="OrderNumber" ViewItem="OrderNumber" ShowCaption="" Index="0" IsNewNode="True" />
+              <LayoutItem Id="Customer" ViewItem="Customer" ShowCaption="" Index="1" IsNewNode="True" />
+              <LayoutItem Id="Status" ViewItem="Status" ShowCaption="" Index="2" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="OrderInfo_col2" ShowCaption="False" IsNewNode="True">
+              <LayoutItem Id="RequestedPickupDate" ViewItem="RequestedPickupDate" ShowCaption="" Index="0" IsNewNode="True" />
+              <LayoutItem Id="ActualDeliveryDate" ViewItem="ActualDeliveryDate" ShowCaption="" Index="1" IsNewNode="True" />
+              <LayoutItem Id="ActualPickupDate" ViewItem="ActualPickupDate" ShowCaption="" Index="2" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="CargoAssignment" Index="1" ShowCaption="False" IsNewNode="True">
+            <LayoutGroup Id="Cargo" ShowCaption="True" Index="1" IsNewNode="True">
+              <LayoutItem Id="CargoWeightKg" ViewItem="CargoWeightKg" ShowCaption="" Index="0" IsNewNode="True" />
+              <LayoutItem Id="CargoDescription" ViewItem="CargoDescription" ShowCaption="" Index="1" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Assignment" ShowCaption="True" IsNewNode="True">
+              <LayoutItem Id="AssignedVehicle" ViewItem="AssignedVehicle" ShowCaption="" Index="0" IsNewNode="True" />
+              <LayoutItem Id="AssignedDriver" ViewItem="AssignedDriver" ShowCaption="" Index="1" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Addresses" Index="2" ShowCaption="True" IsNewNode="True">
+            <LayoutItem Id="PickupAddress" ViewItem="PickupAddress" ShowCaption="" Index="0" IsNewNode="True" />
+            <LayoutItem Id="DeliveryAddress" ViewItem="DeliveryAddress" ShowCaption="" Index="1" IsNewNode="True" />
+          </LayoutGroup>
+          <LayoutGroup Id="NotesGroup" Caption="Notes" ShowCaption="True" IsNewNode="True">
+            <LayoutItem Id="Notes" ViewItem="Notes" ShowCaption="" Index="0" IsNewNode="True" />
+          </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" Removed="True">
+            <LayoutGroup Id="DeliveryOrder" Index="2" Removed="True">
+              <LayoutGroup Id="DeliveryOrder_col1" Removed="True">
+                <LayoutItem Id="ActualPickupDate" Removed="True" />
+                <LayoutItem Id="CargoWeightKg" Removed="True" />
+                <LayoutItem Id="Customer" Removed="True" />
+                <LayoutItem Id="OrderNumber" Removed="True" />
+                <LayoutItem Id="RequestedPickupDate" Removed="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="DeliveryOrder_col2">
+                <LayoutItem Id="ActualDeliveryDate" Removed="True" />
+                <LayoutItem Id="AssignedDriver" Removed="True" />
+                <LayoutItem Id="AssignedVehicle" Removed="True" />
+                <LayoutItem Id="Status" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" Removed="True">
+            <LayoutItem Id="CargoDescription" Removed="True" />
+            <LayoutItem Id="DeliveryAddress" Removed="True" />
+            <LayoutItem Id="Notes" Removed="True" />
+            <LayoutItem Id="PickupAddress" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
 </Application>

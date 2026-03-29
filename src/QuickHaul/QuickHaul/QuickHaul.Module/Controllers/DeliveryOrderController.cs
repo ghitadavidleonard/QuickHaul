@@ -1,6 +1,5 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using QuickHaul.Module.BusinessObjects;
@@ -131,6 +130,21 @@ namespace QuickHaul.Module.Controllers
             if (!order.AssignedDriver.IsActive)
             {
                 ShowError($"Driver '{order.AssignedDriver.FullName}' is not active.");
+                return;
+            }
+
+            var driver = ObjectSpace.GetObject(order.AssignedDriver);
+            var driverHasAnotherActiveOrder = ObjectSpace
+                .GetObjectsQuery<DeliveryOrder>()
+                .Any(o =>
+                    o.ID != order.ID &&
+                    o.AssignedDriver != null &&
+                    o.AssignedDriver.ID == driver.ID &&
+                    (o.Status == DeliveryOrderStatus.Dispatched || o.Status == DeliveryOrderStatus.InTransit));
+
+            if (driverHasAnotherActiveOrder)
+            {
+                ShowError($"Driver '{order.AssignedDriver.FullName}' is already assigned to an active delivery.");
                 return;
             }
 

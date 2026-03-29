@@ -1,9 +1,7 @@
-﻿using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.Model;
+﻿using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using Microsoft.EntityFrameworkCore;
 using QuickHaul.Module.BusinessObjects.Enums;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
