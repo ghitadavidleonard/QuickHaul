@@ -37,5 +37,26 @@ namespace QuickHaul.Module.BusinessObjects
             UsedProperties = "HireDate")]
         [Browsable(false)]
         public bool HireDateNotInFuture => HireDate <= DateTime.Now;
+
+        [RuleFromBoolProperty(
+            "Driver_CannotDelete_WhenReferencedByActiveOrders",
+            DefaultContexts.Delete,
+            "Cannot delete this driver because it is referenced by an active delivery order.")]
+        [Browsable(false)]
+        public bool CanDeleteWhenNotReferencedByActiveOrders
+        {
+            get
+            {
+                if (ObjectSpace == null)
+                    return true;
+
+                return !ObjectSpace.GetObjectsQuery<DeliveryOrder>()
+                    .Any(o =>
+                        o.AssignedDriver != null &&
+                        o.AssignedDriver.ID == ID &&
+                        o.Status != DeliveryOrderStatus.Closed &&
+                        o.Status != DeliveryOrderStatus.Cancelled);
+            }
+        }
     }
 }

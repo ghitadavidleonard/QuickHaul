@@ -1,8 +1,11 @@
-﻿using DevExpress.ExpressApp.Model;
+﻿using DevExpress.ExpressApp.EFCore;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.Xpo;
 using QuickHaul.Module.BusinessObjects.Enums;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace QuickHaul.Module.BusinessObjects
@@ -34,6 +37,27 @@ namespace QuickHaul.Module.BusinessObjects
 
         [StringLength(200)]
         public virtual string CurrentLocation { get; set; }
+
+        [RuleFromBoolProperty(
+            "Vehicle_CannotDelete_WhenReferencedByActiveOrders",
+            DefaultContexts.Delete,
+            "Cannot delete this vehicle because it is referenced by an active delivery order.")]
+        [Browsable(false)]
+        public bool CanDeleteWhenNotReferencedByActiveOrders
+        {
+            get
+            {
+                if (ObjectSpace == null)
+                    return true;
+
+                return !ObjectSpace.GetObjectsQuery<DeliveryOrder>()
+                    .Any(o =>
+                        o.AssignedVehicle != null &&
+                        o.AssignedVehicle.ID == ID &&
+                        o.Status != DeliveryOrderStatus.Closed &&
+                        o.Status != DeliveryOrderStatus.Cancelled);
+            }
+        }
 
         public override void OnSaving()
         {
