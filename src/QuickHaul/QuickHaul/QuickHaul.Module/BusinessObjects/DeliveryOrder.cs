@@ -43,8 +43,10 @@ namespace QuickHaul.Module.BusinessObjects
         [RuleRequiredField]
         public virtual DateTime RequestedPickupDate { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public virtual DateTime? ActualPickupDate { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public virtual DateTime? ActualDeliveryDate { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
@@ -70,22 +72,6 @@ namespace QuickHaul.Module.BusinessObjects
         [Browsable(false)]
         public bool CargoWeightWithinVehicleCapacity =>
             AssignedVehicle == null || CargoWeightKg <= AssignedVehicle.PayloadCapacityKg;
-
-        [RuleFromBoolProperty("AssignedVehicle_RequiredForDispatch", DefaultContexts.Save,
-            "A vehicle must be assigned before dispatching.",
-            SkipNullOrEmptyValues = false,
-            UsedProperties = "AssignedVehicle, Status")]
-        [Browsable(false)]
-        public bool VehicleAssignedIfDispatched =>
-            Status != DeliveryOrderStatus.Dispatched || AssignedVehicle != null;
-
-        [RuleFromBoolProperty("AssignedDriver_RequiredForDispatch", DefaultContexts.Save,
-            "A driver must be assigned before dispatching.",
-            SkipNullOrEmptyValues = false,
-            UsedProperties = "AssignedDriver, Status")]
-        [Browsable(false)]
-        public bool DriverAssignedIfDispatched =>
-            Status != DeliveryOrderStatus.Dispatched || AssignedDriver != null;
 
         [RuleFromBoolProperty(
             "AssignedDriver_MustBeActive",

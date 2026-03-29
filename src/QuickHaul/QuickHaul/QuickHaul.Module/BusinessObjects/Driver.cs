@@ -15,7 +15,7 @@ namespace QuickHaul.Module.BusinessObjects
         public virtual string FullName { get; set; }
 
         [RuleRequiredField]
-        [RuleUniqueValue]
+        [RuleUniqueValue(CustomMessageTemplate = "A driver with license number '{LicenseNumber}' is already present.")]
         [StringLength(30)]
         public virtual string LicenseNumber { get; set; }
 

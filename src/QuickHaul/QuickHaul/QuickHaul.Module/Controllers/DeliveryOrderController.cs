@@ -55,8 +55,6 @@ namespace QuickHaul.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
-            // Watch for Status changes triggered by data refreshes so button
-            // visibility stays in sync automatically.
             ((INotifyPropertyChanged)ViewCurrentObject).PropertyChanged += Order_PropertyChanged;
 
             if (ObjectSpace.IsNewObject(ViewCurrentObject))
@@ -71,9 +69,16 @@ namespace QuickHaul.Module.Controllers
                 UpdateActionStates();
         }
 
-        // Controls which buttons are visible by toggling the Active["ValidStatus"] flag.
-        // action.Active is an AND-dictionary: the button is shown only when every
-        // registered flag is true. Setting one flag to false hides the button.
+        private void ShowError(string message)
+        {
+            Application.ShowViewStrategy.ShowMessage(new MessageOptions
+            {
+                Message = message,
+                Type = InformationType.Error,
+                Duration = 4000
+            });
+        }
+
         private void UpdateActionStates()
         {
             var status = ViewCurrentObject?.Status;
@@ -86,8 +91,6 @@ namespace QuickHaul.Module.Controllers
                 status == DeliveryOrderStatus.Created || status == DeliveryOrderStatus.Dispatched;
         }
 
-        // Shared popup builder: creates a fresh TransitionRemarksParameters instance
-        // and tells XAF to render it as the popup's form.
         private void Action_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
             var objectSpace = Application.CreateObjectSpace(typeof(TransitionRemarksParameters));
@@ -95,38 +98,59 @@ namespace QuickHaul.Module.Controllers
             e.View = Application.CreateDetailView(objectSpace, parameters);
         }
 
-        // ── Transition: Created → Dispatched ────────────────────────────────────
         private void AssignAndDispatch_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
 
+            if(ObjectSpace.IsObjectToSave(order))
+            {
+                ShowError("Please save the order before dispatching.");
+                return;
+            }
+
             if (order.AssignedVehicle == null)
-                throw new UserFriendlyException("A vehicle must be assigned before dispatching.");
+            {
+                ShowError("A vehicle must be assigned before dispatching.");
+                return;
+            }
+
             if (order.AssignedDriver == null)
-                throw new UserFriendlyException("A driver must be assigned before dispatching.");
-            if (order.AssignedVehicle.Status != VehicleStatus.Available)
-                throw new UserFriendlyException(
-                    $"Vehicle '{order.AssignedVehicle.RegistrationPlate}' is not available " +
+            {
+                ShowError("A driver must be assigned before dispatching.");
+                return;
+            }
+
+            if (order.AssignedVehicle?.Status != VehicleStatus.Available)
+            {
+                ShowError($"Vehicle '{order.AssignedVehicle.RegistrationPlate}' is not available " +
                     $"(current status: {order.AssignedVehicle.Status}).");
+                return;
+            }
+
             if (!order.AssignedDriver.IsActive)
-                throw new UserFriendlyException(
-                    $"Driver '{order.AssignedDriver.FullName}' is not active.");
+            {
+                ShowError($"Driver '{order.AssignedDriver.FullName}' is not active.");
+                return;
+            }
 
             var requiredLicense = GetRequiredLicense(order.AssignedVehicle.VehicleClass);
             if ((order.AssignedDriver.LicenseClasses & requiredLicense) != requiredLicense)
-                throw new UserFriendlyException(
-                    $"Driver '{order.AssignedDriver.FullName}' does not hold the required " +
+            {
+                ShowError($"Driver '{order.AssignedDriver.FullName}' does not hold the required " +
                     $"{requiredLicense} license for this vehicle class.");
+                return;
+            }
 
             if (order.CargoWeightKg > order.AssignedVehicle.PayloadCapacityKg)
-                throw new UserFriendlyException(
+            {
+                ShowError(
                     $"Cargo weight ({order.CargoWeightKg} kg) exceeds the vehicle's " +
                     $"payload capacity ({order.AssignedVehicle.PayloadCapacityKg} kg).");
+                return;
+            }
 
-            // ObjectSpace.GetObject ensures we edit the vehicle through the same
-            // Unit-of-Work so both changes are committed atomically.
-            var vehicle = ObjectSpace.GetObject(order.AssignedVehicle);
+            var vehicle = order.AssignedVehicle;
             vehicle.Status = VehicleStatus.IsUse;
 
             CreateDeliveryEvent(order, order.Status, DeliveryOrderStatus.Dispatched, remarks);
@@ -137,7 +161,6 @@ namespace QuickHaul.Module.Controllers
             View.Refresh();
         }
 
-        // ── Transition: Dispatched → InTransit ──────────────────────────────────
         private void ConfirmPickup_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             var order = ViewCurrentObject;
@@ -153,7 +176,6 @@ namespace QuickHaul.Module.Controllers
             View.Refresh();
         }
 
-        // ── Transition: InTransit → Delivered ───────────────────────────────────
         private void ConfirmDelivery_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             var order = ViewCurrentObject;
@@ -169,7 +191,6 @@ namespace QuickHaul.Module.Controllers
             View.Refresh();
         }
 
-        // ── Transition: Delivered → Closed ──────────────────────────────────────
         private void CloseOrder_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             var order = ViewCurrentObject;
@@ -189,12 +210,10 @@ namespace QuickHaul.Module.Controllers
             View.Refresh();
         }
 
-        // ── Transition: Created|Dispatched → Cancelled ──────────────────────────
         private void Cancel_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             var order = ViewCurrentObject;
             var remarks = ((TransitionRemarksParameters)e.PopupWindowViewCurrentObject).Remarks;
-            var fromStatus = order.Status; // capture before changing it
 
             // Release the vehicle whether we're cancelling from Created or Dispatched.
             if (order.AssignedVehicle != null)
@@ -203,15 +222,13 @@ namespace QuickHaul.Module.Controllers
                 vehicle.Status = VehicleStatus.Available;
             }
 
-            CreateDeliveryEvent(order, fromStatus, DeliveryOrderStatus.Cancelled, remarks);
+            CreateDeliveryEvent(order, order.Status, DeliveryOrderStatus.Cancelled, remarks);
             order.Status = DeliveryOrderStatus.Cancelled;
 
             ObjectSpace.CommitChanges();
             UpdateActionStates();
             View.Refresh();
         }
-
-        // ── Shared helpers ───────────────────────────────────────────────────────
 
         private void CreateDeliveryEvent(DeliveryOrder order, DeliveryOrderStatus? fromStatus,
             DeliveryOrderStatus toStatus, string remarks)
@@ -225,8 +242,6 @@ namespace QuickHaul.Module.Controllers
             evt.Remarks = remarks;
         }
 
-        // Fires only on the very first save of a new order.
-        // Generates the sequential OrderNumber and the initial "Created" audit event.
         private void ObjectSpace_Committing(object sender, EventArgs e)
         {
             ObjectSpace.Committing -= ObjectSpace_Committing;
@@ -254,9 +269,6 @@ namespace QuickHaul.Module.Controllers
             creationEvent.ChangedBy = GetCurrentUserName();
         }
 
-        // Maps VehicleClass → the corresponding LicenseClasses flag.
-        // A direct cast is unsafe because VehicleClass.HeavyTruck = 3
-        // while LicenseClasses.HeavyTruck = 4 (Flags bit).
         private static LicenseClasses GetRequiredLicense(VehicleClass vehicleClass) => vehicleClass switch
         {
             VehicleClass.Van => LicenseClasses.Van,

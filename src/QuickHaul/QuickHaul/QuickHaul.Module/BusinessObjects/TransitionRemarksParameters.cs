@@ -1,6 +1,6 @@
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace QuickHaul.Module.BusinessObjects
@@ -8,8 +8,7 @@ namespace QuickHaul.Module.BusinessObjects
     [DomainComponent]
     public class TransitionRemarksParameters
     {
-        // XAF requires a key property on non-persistent domain components.
-        // It is hidden from the UI automatically.
+        [Browsable(false)]
         [Key]
         public Guid Oid { get; set; } = Guid.NewGuid();
 
