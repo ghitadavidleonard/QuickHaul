@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
+  <ActionDesign>
+    <Actions>
+      <Action Id="AssignAndDispatch" PaintStyle="CaptionAndImage" ImageMode="UseActionImage" Caption="Assign &amp; Dispatch" ImageName="Actions_Send" />
+      <Action Id="CancelOrder" ImageName="del" />
+      <Action Id="CloseOrder" ImageName="Check" />
+      <Action Id="ConfirmDelivery" ImageName="ApplyChanges" />
+      <Action Id="ConfirmPickup" ImageName="ApplyChanges" />
+    </Actions>
+  </ActionDesign>
   <BOModel>
     <Class Name="QuickHaul.Module.BusinessObjects.DeliveryOrder">
       <OwnMembers>
