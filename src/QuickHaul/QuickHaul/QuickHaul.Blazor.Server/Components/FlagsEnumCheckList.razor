@@ -1,0 +1,74 @@
+﻿@using QuickHaul.Blazor.Server.Models
+
+<style>
+    .flags-enum-checklist {
+        padding: 8px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .flags-enum-checklist.disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .flags-enum-checklist.disabled .form-check-label {
+        color: #6c757d;
+    }
+</style>
+
+<div class="flags-enum-checklist">
+    @foreach (var item in Items)
+    {
+        <div class="form-check">
+            <input type="checkbox"
+                   id="@($"chk_{item.Value}")"
+                   checked="@IsChecked(item.Value)"
+                   disabled="@IsReadOnly"
+                   @onchange="(args) => OnCheckboxChanged(item.Value, (bool)args.Value)" />
+            <label class="form-check-label" for="@($"chk_{item.Value}")">
+                @item.Text
+            </label>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Value { get; set; }
+    
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+    
+    [Parameter]
+    public List<CheckListItem> Items { get; set; } = new();
+    
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
+
+    private bool IsChecked(int itemValue)
+    {
+        return (Value & itemValue) == itemValue;
+    }
+    
+    private async Task OnCheckboxChanged(int itemValue, bool isChecked)
+    {
+        if (IsReadOnly)
+            return;
+
+        var newValue = Value;
+        
+        if (isChecked)
+            newValue = Value | itemValue;
+        else
+            newValue = Value & ~itemValue;
+        
+        Value = newValue;
+        await ValueChanged.InvokeAsync(newValue);
+    }
+}

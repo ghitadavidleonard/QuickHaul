@@ -123,5 +123,10 @@
         <ColumnInfo Id="AssignedVehicle" LookupProperty="RegistrationPlate" />
       </Columns>
     </ListView>
+    <DetailView Id="Driver_DetailView">
+      <Items>
+        <PropertyEditor Id="LicenseClasses" PropertyEditorType="QuickHaul.Blazor.Server.Editors.FlagsEnumPropertyEditor" />
+      </Items>
+    </DetailView>
   </Views>
 </Application>

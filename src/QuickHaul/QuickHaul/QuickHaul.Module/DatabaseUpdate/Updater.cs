@@ -136,9 +136,15 @@ namespace QuickHaul.Module.DatabaseUpdate
                 dispatcherRole.AddTypePermission<DeliveryOrder>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Customer>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<OrderSequence>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
-                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
-                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<DeliveryEvent>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.Create, SecurityPermissionState.Deny);
+                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.Delete, SecurityPermissionState.Deny);
+                dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.Write, SecurityPermissionState.Deny);
+                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.Create, SecurityPermissionState.Deny);
+                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.Delete, SecurityPermissionState.Deny);
+                dispatcherRole.AddTypePermission<Driver>(SecurityOperations.Write, SecurityPermissionState.Deny);
 
                 AddNavigationPermissions(dispatcherRole);
         }

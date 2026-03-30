@@ -19,6 +19,7 @@ namespace QuickHaul.Module.BusinessObjects
         [StringLength(30)]
         public virtual string LicenseNumber { get; set; }
 
+        [EditorAlias("FlagsEnumPropertyEditor")]
         public virtual LicenseClasses LicenseClasses { get; set; }
 
         [RuleRequiredField]
