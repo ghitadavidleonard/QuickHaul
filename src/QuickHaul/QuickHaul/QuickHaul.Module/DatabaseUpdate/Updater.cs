@@ -135,8 +135,10 @@ namespace QuickHaul.Module.DatabaseUpdate
                 dispatcherRole.Name = "Dispatcher";
                 dispatcherRole.AddTypePermission<DeliveryOrder>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Customer>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<OrderSequence>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Driver>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                dispatcherRole.AddTypePermission<DeliveryEvent>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
 
                 AddNavigationPermissions(dispatcherRole);
         }
@@ -155,6 +157,7 @@ namespace QuickHaul.Module.DatabaseUpdate
                 fleetManagerRole.AddTypePermission<Driver>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 fleetManagerRole.AddTypePermission<DeliveryOrder>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
                 fleetManagerRole.AddTypePermission<Customer>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+                fleetManagerRole.AddTypePermission<DeliveryEvent>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
 
                 AddNavigationPermissions(fleetManagerRole);
             }
@@ -193,7 +196,7 @@ namespace QuickHaul.Module.DatabaseUpdate
             vSprinter.Model = "Sprinter 316";
             vSprinter.VehicleClass = VehicleClass.Van;
             vSprinter.PayloadCapacityKg = 1_500m;
-            vSprinter.Status = VehicleStatus.IsUse;
+            vSprinter.Status = VehicleStatus.IsUse;       // Dispatched order o2
             vSprinter.CurrentLocation = "Cluj-Napoca Hub";
 
             var vManTgm = ObjectSpace.CreateObject<Vehicle>();
@@ -202,7 +205,7 @@ namespace QuickHaul.Module.DatabaseUpdate
             vManTgm.Model = "TGM 18.290";
             vManTgm.VehicleClass = VehicleClass.Truck;
             vManTgm.PayloadCapacityKg = 7_000m;
-            vManTgm.Status = VehicleStatus.IsUse;
+            vManTgm.Status = VehicleStatus.IsUse;          // InTransit order o3
             vManTgm.CurrentLocation = "Timisoara Depot";
 
             var vVolvoFh = ObjectSpace.CreateObject<Vehicle>();
@@ -211,7 +214,7 @@ namespace QuickHaul.Module.DatabaseUpdate
             vVolvoFh.Model = "FH 460";
             vVolvoFh.VehicleClass = VehicleClass.HeavyTruck;
             vVolvoFh.PayloadCapacityKg = 24_000m;
-            vVolvoFh.Status = VehicleStatus.Available;
+            vVolvoFh.Status = VehicleStatus.IsUse;          // Delivered order o4 — not yet Closed
             vVolvoFh.CurrentLocation = "Constanta Port";
 
             var vScania = ObjectSpace.CreateObject<Vehicle>();
@@ -289,7 +292,7 @@ namespace QuickHaul.Module.DatabaseUpdate
             o1.Status = DeliveryOrderStatus.Created;
             o1.Notes = "Handle with care. Requires liftgate.";
 
-            // Status: Dispatched — vehicle and driver assigned, picked up
+            // Status: Dispatched — vehicle and driver assigned, awaiting pickup
 
             var o2 = ObjectSpace.CreateObject<DeliveryOrder>();
             o2.OrderNumber = "QH-20260320-002";
@@ -299,13 +302,13 @@ namespace QuickHaul.Module.DatabaseUpdate
             o2.CargoDescription = "Chilled dairy products - temperature-sensitive";
             o2.CargoWeightKg = 820m;
             o2.RequestedPickupDate = new DateTime(2026, 3, 20);
-            o2.ActualPickupDate = new DateTime(2026, 3, 20);
+            // ActualPickupDate intentionally null — pickup not yet confirmed
             o2.Status = DeliveryOrderStatus.Dispatched;
             o2.AssignedVehicle = vSprinter;
             o2.AssignedDriver = dMaria;
             o2.Notes = "Maintain cold chain. Deliver before 10:00.";
 
-            // Status: InTransit — en route to destination
+            // Status: InTransit — picked up and en route to destination
 
             var o3 = ObjectSpace.CreateObject<DeliveryOrder>();
             o3.OrderNumber = "QH-20260322-003";
@@ -315,13 +318,13 @@ namespace QuickHaul.Module.DatabaseUpdate
             o3.CargoDescription = "Steel beams, cement bags, and scaffolding parts";
             o3.CargoWeightKg = 6_800m;
             o3.RequestedPickupDate = new DateTime(2026, 3, 22);
-            o3.ActualPickupDate = new DateTime(2026, 3, 22);
+            o3.ActualPickupDate = new DateTime(2026, 3, 22);   // Set during Dispatched → InTransit
             o3.Status = DeliveryOrderStatus.InTransit;
             o3.AssignedVehicle = vManTgm;
             o3.AssignedDriver = dAndrei;
             o3.Notes = "Delivery requires forklift on-site.";
 
-            // Status: Delivered — completed successfully
+            // Status: Delivered — cargo delivered, vehicle not yet released (still InUse)
 
             var o4 = ObjectSpace.CreateObject<DeliveryOrder>();
             o4.OrderNumber = "QH-20260210-004";
@@ -331,8 +334,8 @@ namespace QuickHaul.Module.DatabaseUpdate
             o4.CargoDescription = "UPS units and data centre cooling equipment";
             o4.CargoWeightKg = 15_200m;
             o4.RequestedPickupDate = new DateTime(2026, 2, 10);
-            o4.ActualPickupDate = new DateTime(2026, 2, 10);
-            o4.ActualDeliveryDate = new DateTime(2026, 2, 11);
+            o4.ActualPickupDate = new DateTime(2026, 2, 10);   // Set during Dispatched → InTransit
+            o4.ActualDeliveryDate = new DateTime(2026, 2, 11); // Set during InTransit → Delivered
             o4.Status = DeliveryOrderStatus.Delivered;
             o4.AssignedVehicle = vVolvoFh;
             o4.AssignedDriver = dIon;
@@ -352,6 +355,65 @@ namespace QuickHaul.Module.DatabaseUpdate
             o5.Notes = "Cancelled by customer - order rescheduled.";
 
             ObjectSpace.CommitChanges();
+
+            // ── Delivery Events (audit trail) ────────────────────────────────────
+            // Each order must have events matching every transition it went through.
+
+            const string seedUser = "system-seed";
+
+            // o1: → Created
+            CreateSeedEvent(o1, null, DeliveryOrderStatus.Created,
+                new DateTime(2026, 3, 28, 8, 0, 0, DateTimeKind.Utc), seedUser);
+
+            // o2: → Created → Dispatched
+            CreateSeedEvent(o2, null, DeliveryOrderStatus.Created,
+                new DateTime(2026, 3, 19, 14, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o2, DeliveryOrderStatus.Created, DeliveryOrderStatus.Dispatched,
+                new DateTime(2026, 3, 20, 7, 0, 0, DateTimeKind.Utc), seedUser);
+
+            // o3: → Created → Dispatched → InTransit
+            CreateSeedEvent(o3, null, DeliveryOrderStatus.Created,
+                new DateTime(2026, 3, 21, 10, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o3, DeliveryOrderStatus.Created, DeliveryOrderStatus.Dispatched,
+                new DateTime(2026, 3, 22, 6, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o3, DeliveryOrderStatus.Dispatched, DeliveryOrderStatus.InTransit,
+                new DateTime(2026, 3, 22, 9, 30, 0, DateTimeKind.Utc), seedUser);
+
+            // o4: → Created → Dispatched → InTransit → Delivered
+            CreateSeedEvent(o4, null, DeliveryOrderStatus.Created,
+                new DateTime(2026, 2, 9, 11, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o4, DeliveryOrderStatus.Created, DeliveryOrderStatus.Dispatched,
+                new DateTime(2026, 2, 10, 6, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o4, DeliveryOrderStatus.Dispatched, DeliveryOrderStatus.InTransit,
+                new DateTime(2026, 2, 10, 8, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o4, DeliveryOrderStatus.InTransit, DeliveryOrderStatus.Delivered,
+                new DateTime(2026, 2, 11, 15, 0, 0, DateTimeKind.Utc), seedUser);
+
+            // o5: → Created → Cancelled
+            CreateSeedEvent(o5, null, DeliveryOrderStatus.Created,
+                new DateTime(2026, 2, 24, 9, 0, 0, DateTimeKind.Utc), seedUser);
+            CreateSeedEvent(o5, DeliveryOrderStatus.Created, DeliveryOrderStatus.Cancelled,
+                new DateTime(2026, 2, 25, 8, 0, 0, DateTimeKind.Utc), seedUser,
+                "Cancelled by customer - order rescheduled.");
+
+            ObjectSpace.CommitChanges();
+        }
+
+        private void CreateSeedEvent(
+            DeliveryOrder order,
+            DeliveryOrderStatus? fromStatus,
+            DeliveryOrderStatus toStatus,
+            DateTime timestampUtc,
+            string changedBy,
+            string remarks = null)
+        {
+            var evt = ObjectSpace.CreateObject<DeliveryEvent>();
+            evt.DeliveryOrder = order;
+            evt.Timestamp = timestampUtc;
+            evt.FromStatus = fromStatus;
+            evt.ToStatus = toStatus;
+            evt.ChangedBy = changedBy;
+            evt.Remarks = remarks;
         }
     }
 }
