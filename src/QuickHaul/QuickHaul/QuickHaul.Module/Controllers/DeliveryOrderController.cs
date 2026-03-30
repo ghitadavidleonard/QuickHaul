@@ -81,6 +81,14 @@ namespace QuickHaul.Module.Controllers
         private void UpdateActionStates()
         {
             var status = ViewCurrentObject?.Status;
+            bool isFleetManager =
+                (SecuritySystem.CurrentUser as PermissionPolicyUser)?.Roles.Any(r => r.Name == "FleetManager") == true;
+
+            _assignAndDispatchAction.Active["Role"] = !isFleetManager;
+            _confirmPickupAction.Active["Role"] = !isFleetManager;
+            _confirmDeliveryAction.Active["Role"] = !isFleetManager;
+            _closeOrderAction.Active["Role"] = !isFleetManager;
+            _cancelAction.Active["Role"] = !isFleetManager;
 
             _assignAndDispatchAction.Active["ValidStatus"] = status == DeliveryOrderStatus.Created;
             _confirmPickupAction.Active["ValidStatus"] = status == DeliveryOrderStatus.Dispatched;

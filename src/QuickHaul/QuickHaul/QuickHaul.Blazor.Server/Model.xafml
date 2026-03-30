@@ -19,18 +19,7 @@
   </BOModel>
   <NavigationItems NavigationStyle="Accordion">
     <Items>
-      <Item Id="@633d8efe-ad10-4766-b36c-4a274f7f6d6e" Caption="Operations" IsNewNode="True">
-        <Items IsNewNode="True">
-          <Item Id="DeliveryOrder_ListView" ViewId="DeliveryOrder_ListView" ObjectKey="" ImageName="CustomerQuickSales" Caption="Delivery Orders" IsNewNode="True" />
-        </Items>
-      </Item>
-      <Item Id="@bd57845d-524c-4035-b900-f55a5ed2a69f" Caption="Fleet" IsNewNode="True">
-        <Items IsNewNode="True">
-          <Item Id="Driver_ListView" ViewId="Driver_ListView" ObjectKey="" ImageName="BO_Person" Caption="Drivers" IsNewNode="True" />
-          <Item Id="Vehicle_ListView" ViewId="Vehicle_ListView" ObjectKey="" ImageName="Travel_Car" Caption="Vehicles" IsNewNode="True" />
-        </Items>
-      </Item>
-      <Item Id="@d350d158-bad1-49b2-bfa1-b8379aeb6e62" Caption="Clients" IsNewNode="True">
+      <Item Id="ClientsNavigation" Caption="Clients" IsNewNode="True">
         <Items IsNewNode="True">
           <Item Id="Customer_ListView" ViewId="Customer_ListView" ObjectKey="" ImageName="BO_Customer" Caption="Customers" IsNewNode="True" />
         </Items>
@@ -41,6 +30,17 @@
           <Item Id="DeliveryOrder_ListView" ImageName="CustomerQuickSales" Removed="True" />
           <Item Id="Driver_ListView" ImageName="BO_Person" Removed="True" />
           <Item Id="Vehicle_ListView" ImageName="Travel_Car" Removed="True" />
+        </Items>
+      </Item>
+      <Item Id="FleetNavigation" Caption="Fleet" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="Driver_ListView" ViewId="Driver_ListView" ObjectKey="" ImageName="BO_Person" Caption="Drivers" IsNewNode="True" />
+          <Item Id="Vehicle_ListView" ViewId="Vehicle_ListView" ObjectKey="" ImageName="Travel_Car" Caption="Vehicles" IsNewNode="True" />
+        </Items>
+      </Item>
+      <Item Id="OperationsNavigation" Caption="Operations" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="DeliveryOrder_ListView" ViewId="DeliveryOrder_ListView" ObjectKey="" ImageName="CustomerQuickSales" Caption="Delivery Orders" IsNewNode="True" />
         </Items>
       </Item>
     </Items>

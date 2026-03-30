@@ -137,7 +137,9 @@ namespace QuickHaul.Module.DatabaseUpdate
                 dispatcherRole.AddTypePermission<Customer>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Vehicle>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
                 dispatcherRole.AddTypePermission<Driver>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
-            }
+
+                AddNavigationPermissions(dispatcherRole);
+        }
 
             return dispatcherRole;
         }
@@ -145,7 +147,7 @@ namespace QuickHaul.Module.DatabaseUpdate
         PermissionPolicyRole CreateFleetManagerRole()
         {
             var fleetManagerRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "FleetManager");
-            if (fleetManagerRole == null) 
+            if (fleetManagerRole == null)
             {
                 fleetManagerRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
                 fleetManagerRole.Name = "FleetManager";
@@ -153,9 +155,20 @@ namespace QuickHaul.Module.DatabaseUpdate
                 fleetManagerRole.AddTypePermission<Driver>(SecurityOperations.CRUDAccess, SecurityPermissionState.Allow);
                 fleetManagerRole.AddTypePermission<DeliveryOrder>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
                 fleetManagerRole.AddTypePermission<Customer>(SecurityOperations.ReadOnlyAccess, SecurityPermissionState.Allow);
+
+                AddNavigationPermissions(fleetManagerRole);
             }
 
             return fleetManagerRole;
+        }
+
+        private void AddNavigationPermissions(PermissionPolicyRole role)
+        {
+            role.AddNavigationPermission(@"Application/NavigationItems/Items/OperationsNavigation/Items/DeliveryOrder_ListView", SecurityPermissionState.Allow);
+            role.AddNavigationPermission(@"Application/NavigationItems/Items/ClientsNavigation/Items/Customer_ListView", SecurityPermissionState.Allow);
+            role.AddNavigationPermission(@"Application/NavigationItems/Items/FleetNavigation/Items/Vehicle_ListView", SecurityPermissionState.Allow);
+            role.AddNavigationPermission(@"Application/NavigationItems/Items/FleetNavigation/Items/Driver_ListView", SecurityPermissionState.Allow);
+            role.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/Dashboards", SecurityPermissionState.Allow);
         }
 
         private void SeedDemoData()
