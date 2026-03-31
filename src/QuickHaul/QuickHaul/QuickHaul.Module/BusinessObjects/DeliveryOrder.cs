@@ -62,13 +62,6 @@ namespace QuickHaul.Module.BusinessObjects
         [ModelDefault("AllowDelete", "False")]
         public virtual ObservableCollection<DeliveryEvent> DeliveryEvents { get; set; } = new ObservableCollection<DeliveryEvent>();
 
-        [RuleFromBoolProperty("RequestedPickupDate_TodayOrLater", DefaultContexts.Save,
-            "Requested pickup date must be today or later.",
-            SkipNullOrEmptyValues = false,
-            UsedProperties = "RequestedPickupDate")]
-        [Browsable(false)]
-        public bool RequestedPickupDateTodayOrLater => RequestedPickupDate >= DateTime.Today;
-
         [RuleFromBoolProperty("CargoWeightKg_VehicleCapacity", DefaultContexts.Save,
             "Cargo weight exceeds the assigned vehicle's payload capacity.",
             SkipNullOrEmptyValues = false,

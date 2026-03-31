@@ -271,6 +271,12 @@ namespace QuickHaul.Module.Controllers
             var order = ViewCurrentObject;
             if (string.IsNullOrEmpty(order.OrderNumber))
             {
+                if (order.RequestedPickupDate < DateTime.Today)
+                {
+                    ShowError("Requested pickup date must be today or later.");
+                    return;
+                }
+
                 string dateKey = DateTime.Today.ToString("yyyyMMdd");
                 var sequence   = ObjectSpace.FirstOrDefault<OrderSequence>(s => s.DateKey == dateKey);
                 if (sequence == null)

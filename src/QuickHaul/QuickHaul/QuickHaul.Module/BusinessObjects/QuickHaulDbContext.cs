@@ -44,6 +44,11 @@ namespace QuickHaul.Module.BusinessObjects
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DeliveryOrder>()
+                .HasMany(o => o.DeliveryEvents)
+                .WithOne(e => e.DeliveryOrder)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
