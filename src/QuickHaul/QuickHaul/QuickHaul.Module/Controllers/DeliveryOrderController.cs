@@ -1,7 +1,9 @@
+using DevExpress.Data.Utils;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
+using Microsoft.Extensions.DependencyInjection;
 using QuickHaul.Module.BusinessObjects;
 using QuickHaul.Module.BusinessObjects.Enums;
 using System.ComponentModel;
@@ -172,8 +174,7 @@ namespace QuickHaul.Module.Controllers
                 return;
             }
 
-            var vehicle = order.AssignedVehicle;
-            vehicle.Status = VehicleStatus.IsUse;
+            UpdateVehicleStatus(ObjectSpace.ServiceProvider, order.AssignedVehicle.ID, VehicleStatus.IsUse);
 
             CreateDeliveryEvent(order, order.Status, DeliveryOrderStatus.Dispatched, remarks);
             order.Status = DeliveryOrderStatus.Dispatched;
@@ -220,8 +221,7 @@ namespace QuickHaul.Module.Controllers
 
             if (order.AssignedVehicle != null)
             {
-                var vehicle = ObjectSpace.GetObject(order.AssignedVehicle);
-                vehicle.Status = VehicleStatus.Available;
+                UpdateVehicleStatus(ObjectSpace.ServiceProvider, order.AssignedVehicle.ID, VehicleStatus.Available);
             }
 
             CreateDeliveryEvent(order, order.Status, DeliveryOrderStatus.Closed, remarks);
@@ -240,8 +240,7 @@ namespace QuickHaul.Module.Controllers
             // Release the vehicle whether we're cancelling from Created or Dispatched.
             if (order.AssignedVehicle != null)
             {
-                var vehicle = ObjectSpace.GetObject(order.AssignedVehicle);
-                vehicle.Status = VehicleStatus.Available;
+                UpdateVehicleStatus(ObjectSpace.ServiceProvider, order.AssignedVehicle.ID, VehicleStatus.Available);
             }
 
             CreateDeliveryEvent(order, order.Status, DeliveryOrderStatus.Cancelled, remarks);
@@ -313,6 +312,18 @@ namespace QuickHaul.Module.Controllers
             ((INotifyPropertyChanged)ViewCurrentObject).PropertyChanged -= Order_PropertyChanged;
             ObjectSpace.Committing -= ObjectSpace_Committing;
             base.OnDeactivated();
+        }
+
+        private static void UpdateVehicleStatus(IServiceProvider serviceProvider, Guid vehicleId, VehicleStatus status)
+        {
+            var osFactory = serviceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
+
+            using var os = osFactory.CreateNonSecuredObjectSpace(typeof(Vehicle));
+
+            var vehicle = os.GetObjectByKey<Vehicle>(vehicleId);
+            vehicle.Status = status;
+
+            os.CommitChanges();
         }
     }
 }
